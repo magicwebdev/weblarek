@@ -3,6 +3,10 @@ import { apiProducts } from './utils/data';
 import { Buyer } from './components/models/Buyer';
 import { Basket } from './components/models/Basket';
 import { Catalog } from './components/models/Catalog';
+import { Api } from './components/base/Api';
+import { AppApi } from './components/services/AppApi';
+
+const API_URL = import.meta.env.VITE_API_ORIGIN;
 
 const catalog = new Catalog();
 catalog.setProducts(apiProducts.items);
@@ -33,3 +37,20 @@ console.log('Данные покупателя после заполнения:'
 console.log('Проверка заполненных данных:', buyer.validateBuyerData());
 buyer.clearBuyerData();
 console.log('Проверка данных покупателя после очистки:', buyer.validateBuyerData());
+
+const baseApi = new Api(API_URL);
+const api = new AppApi(baseApi);
+console.log('URL сервера:', API_URL);
+api
+  .getProducts()
+  .then((data) => {
+    console.log('Ответ от сервера получен!');
+    console.log('Всего товаров:', data.total);
+    console.log('Массив товаров с сервера:', data.items);
+    catalog.setProducts(data.items);
+    console.log('Товары в каталоге после загрузки с сервера:', catalog.getProducts());
+    console.log('Количество товаров в каталоге:', catalog.getProducts().length);
+  })
+  .catch((error) => {
+    console.error('Ошибка при загрузке товаров с сервера:', error);
+  });
