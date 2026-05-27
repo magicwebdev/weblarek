@@ -185,6 +185,6 @@ type TPayment = 'card' | 'cash' | '';
 `setAddress(address: string): void` - сохранение адреса доставки
 `getBuyerData(): IBuyer` - получение всех данных покупателя
 `clearBuyerData(): void` - очистка данных покупателя
-`validateBuyerData(): {payment?: string; email?: string; phone?: string; address?: string}` - валидация данных покупателя. Возвращает объект, где ключи — названия полей с ошибками, а значения — текст ошибки. Если поле валидно, оно отсутствует в возвращаемом объекте.
+`validateBuyerData(): {payment?: string; email?: string; phone?: string; address?: string}` - валидация данных покупателя. Возвращает объект, где ключи названия полей с ошибками, а значения текст ошибки. Если поле валидно, оно отсутствует в возвращаемом объекте.
 
 ### Слой коммуникации
