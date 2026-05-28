@@ -23,17 +23,19 @@ export interface IBuyer {
   address: string;
 }
 
-export interface IOrderData extends IBuyer {    
-    total: number;
-    items: string[];
+export type TBuyerErrors = Partial<Record<keyof IBuyer, string>>;
+
+export interface IOrderData extends IBuyer {
+  total: number;
+  items: string[];
 }
 
 export interface IProductsResponse {
-    total: number;
-    items: IProduct[];
+  total: number;
+  items: IProduct[];
 }
 
 export interface IOrderResponse {
-    id: string;
-    total: number;
+  id: string;
+  total: number;
 }

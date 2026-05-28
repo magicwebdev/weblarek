@@ -5,8 +5,7 @@ import { Basket } from './components/models/Basket';
 import { Catalog } from './components/models/Catalog';
 import { Api } from './components/base/Api';
 import { AppApi } from './components/services/AppApi';
-
-const API_URL = import.meta.env.VITE_API_ORIGIN;
+import { API_URL } from './utils/constants';
 
 const catalog = new Catalog();
 catalog.setProducts(apiProducts.items);

@@ -1,5 +1,4 @@
-import { IBuyer } from '../../types';
-import { TPayment } from '../../types';
+import { IBuyer, TPayment, TBuyerErrors } from '../../types';
 
 export class Buyer {
   protected payment: TPayment;
@@ -46,8 +45,8 @@ export class Buyer {
     this.address = '';
   }
 
-  validateBuyerData(): { payment?: string; email?: string; phone?: string; address?: string } {
-    const errors: { payment?: string; email?: string; phone?: string; address?: string } = {};
+  validateBuyerData(): TBuyerErrors {
+    const errors: TBuyerErrors = {};
 
     if (!this.payment || this.payment.trim() === '') {
       errors.payment = 'Способ оплаты не выбран';
