@@ -160,17 +160,100 @@ type TBuyerErrors = Partial<Record<keyof IBuyer, string>>;
 `id: string` - идентификатор заказа
 `total: number` - подтвержденная сумма заказа
 
+#### Интерфейс IHeader
+Описывает данные для отображения шапки сайта.
+
+Поля интерфейса:
+`counter: number` - количество товаров в корзине
+
+#### Интерфейс IModal
+Описывает данные для управления модальным окном.
+
+Поля интерфейса:
+`content: HTMLElement` - HTML-элемент, отображаемый внутри модального окна
+
+#### Интерфейс ICatalog
+Описывает данные для отображения каталога товаров.
+
+Поля интерфейса:
+`content: HTMLElement[]` - массив HTML-элементов карточек товаров
+
+#### Интерфейс IBasket
+Описывает данные для отображения корзины.
+
+Поля интерфейса:
+`content: HTMLElement[]` - массив HTML-элементов карточек товаров в корзине
+`total: number` - общая стоимость товаров в корзине
+
+#### Интерфейс IOrderSuccess
+Описывает данные для отображения сообщения об успешном оформлении заказа.
+
+Поля интерфейса:
+`total: number` - сумма списанных синапсов
+
+#### Интерфейс IForm
+Описывает базовое состояние любой формы.
+
+Поля интерфейса:
+`isValid: boolean` - флаг валидности формы (true - все поля заполнены корректно)
+`errors: string` - текст ошибки для отображения пользователю
+
+#### Тип TCard
+Базовый тип для карточки товара. Содержит минимальный набор полей, общий для всех карточек.
+
+Поля типа:
+`id: string` - идентификатор товара
+`title: string` - название товара
+`price: number | null` - цена товара (null - товар недоступен)
+
+#### Тип TCardCatalog
+Тип для карточки товара в каталоге. Расширяет базовый тип TCard.
+
+Поля типа:
+`category: string` - категория товара (для стилизации фона)
+`image: string` - путь к изображению товара
+
+#### Тип TCardPreview
+Тип для карточки товара в режиме предпросмотра (модальное окно). Расширяет TCardCatalog.
+
+Поля типа:
+`description: string` - подробное описание товара
+`isUnavailable: boolean` - флаг недоступности товара (блокирует кнопку покупки)
+`isInBasket: boolean` - флаг наличия товара в корзине (меняет текст кнопки)
+
+#### Тип TCardBasket
+Тип для карточки товара в корзине. Расширяет базовый тип TCard.
+
+Поля типа:
+index: number - порядковый номер товара в списке корзины
+
+#### Тип TFormOrder
+Тип для формы оформления заказа (способ оплаты и адрес). Расширяет IForm.
+
+Поля типа:
+`payment: TPayment` - выбранный способ оплаты
+`address: string` - адрес доставки
+
+#### Тип TFormContacts
+Тип для формы ввода контактных данных. Расширяет IForm.
+
+Поля типа:
+`email: string` - адрес электронной почты
+`phone: string `- номер телефона
+
 ### Модели данных
 Для учёта данных в приложении должны быть три класса, которые будут разделены между собой по смыслу и зонам ответственности.
 
 #### Класс Catalog
 Хранение товаров, которые можно купить в приложении.
 
-Конструктор класса не принимает параметров.
+Конструктор:
+`constructor(protected events: IEvents)` - принимает брокер событий для уведомления об изменениях в каталоге
 
 Поля класса:  
 `products: IProduct[]` - массив всех товаров  
 `selectedProduct: IProduct | null` - товар, выбранный для подробного отображения
+`events: IEvents` - брокер событий
 
 Методы класса:  
 `setProducts(products: IProduct[]): void` - сохранение массива товаров полученного в параметрах метода
@@ -182,10 +265,12 @@ type TBuyerErrors = Partial<Record<keyof IBuyer, string>>;
 #### Класс Basket
 Хранение товаров, которые пользователь выбрал для покупки.
 
-Конструктор класса не принимает параметров.
+Конструктор:
+`constructor(protected events: IEvents)` - принимает брокер событий для уведомления об изменениях в корзине
 
 Поля класса:  
 `selectedProducts: IProduct[]` - массив товаров, выбранных покупателем для покупки
+`events: IEvents` - брокер событий
 
 Методы класса:  
 `getSelectedProducts(): IProduct[]` - получение массива товаров, которые находятся в корзине
@@ -199,13 +284,15 @@ type TBuyerErrors = Partial<Record<keyof IBuyer, string>>;
 #### Класс Buyer
 Данные покупателя, которые тот должен указать при оформлении заказа.
 
-Конструктор класса не принимает параметров.
+Конструктор:
+`constructor(protected events: IEvents)` - принимает брокер событий для уведомления об изменениях данных покупателя
 
 Поля класса:  
 `payment: TPayment` - способ оплаты
 `email: string` - адрес электронной почты покупателя
 `phone: string` - номер телефона покупателя
 `address: string` - адрес доставки
+`events: IEvents` - брокер событий
 
 Методы класса:  
 `setPayment(payment: TPayment): void` - сохранение способа оплаты
@@ -236,35 +323,204 @@ type TBuyerErrors = Partial<Record<keyof IBuyer, string>>;
 #### HeaderComponent
 Шапка сайта с корзиной.
 
+Конструктор:
+`constructor(container: HTMLElement, events: IEvents)` - принимает контейнер шапки и брокер событий
+
+Поля:
+`counterElement: HTMLElement `- элемент для отображения количества товаров в корзине
+`basketButton: HTMLButtonElement` - кнопка-иконка корзины
+
+Методы:
+`set counter(value: number)` - устанавливает значение счетчика товаров в корзине
+
 #### CatalogComponent
 Каталог товаров.
+
+Конструктор:
+`constructor(container: HTMLElement)` - принимает DOM-элемент-контейнер для каталога
+
+Поля:
+(наследует поля от Component)
+
+Методы:
+`set content(value: HTMLElement[])` - заполняет каталог массивом DOM-элементов карточек товаров, заменяя текущее содержимое
 
 #### ModalComponent
 Модальное окно.
 
+Конструктор:
+`constructor(container: HTMLElement, events: IEvents)` - принимает контейнер модального окна и брокер событий
+
+Поля:
+`contentElement: HTMLElement` - элемент для размещения основного контента модального окна
+`closeButton: HTMLButtonElement` - кнопка закрытия (крестик)
+
+Методы:
+`set content(value: HTMLElement)` - устанавливает содержимое модального окна
+`open(): void` - открывает модальное окно (добавляет класс modal_active) и генерирует событие modal:open
+`close(): void` - закрывает модальное окно, очищает содержимое и генерирует событие modal:close
+
 #### CardComponent
-Общий функционал для всех карточек.
+Базовый абстрактный класс для всех карточек товара.
+
+Конструктор:
+`constructor(container: HTMLElement)` - принимает контейнер карточки
+
+Поля:
+`cardTitleElement: HTMLElement` - элемент для отображения названия товара
+`cardPriceElement: HTMLElement` - элемент для отображения цены товара
+
+Методы:
+`set id(value: string)` - сохраняет id товара в data-атрибуты
+`set title(value: string)` - устанавливает название товара
+`set price(value: number | null)` - устанавливает цену (при null отображает "Бесценно")
 
 ##### CardCatalogComponent
 Карточка товара в каталоге.
 
+Конструктор:
+`constructor(container: HTMLElement, events: IEvents)` - принимает контейнер и брокер событий
+
+Поля:
+`cardCategoryElement: HTMLElement` - элемент для отображения категории товара
+`cardImageElement: HTMLImageElement` - элемент для отображения изображения товара
+
+Методы:
+`set id(value: string)` - сохраняет id товара в data-атрибуты
+`set category(value: string)` - устанавливает категорию с соответствующим CSS-классом
+`set image(value: string)` - устанавливает изображение (добавляет базовый URL CDN)
+
+
 ##### CardBasketComponent
 Карточка товара в корзине.
+
+Конструктор:
+`constructor(container: HTMLElement, events: IEvents)` - принимает контейнер и брокер событий
+
+Поля:
+`cardIndexElement: HTMLElement` - элемент для отображения порядкового номера
+`cardDeleteButton: HTMLButtonElement` - кнопка удаления товара из корзины
+
+Методы:
+`set index(value: number)` - устанавливает порядковый номер товара
 
 ##### CardPreviewComponent
 Предпросмотр карточки товара.
 
+Конструктор:
+`constructor(container: HTMLElement, onCardClick: (data: { id: string }) => void)` - принимает контейнер и колбэк-функцию, которая вызывается при клике на кнопку товара
+
+Поля:
+`cardCategoryElement: HTMLElement` - элемент для отображения категории
+`cardImageElement: HTMLImageElement` - элемент для отображения изображения
+`cardDescriptionElement: HTMLElement` - элемент для отображения описания
+`cardButtonElement: HTMLButtonElement` - кнопка действия (Купить/Удалить)
+
+Методы:
+`set image(value: string)` - устанавливает изображение (добавляет базовый URL CDN)
+`set description(value: string)` - устанавливает описание товара
+`render(data?: Partial<TCardPreview>): HTMLElement` - отображает карточку
+
 #### FormComponent
-Общий функционал для форм.
+Базовый абстрактный класс для всех форм приложения.
+
+Конструктор:
+`constructor(container: HTMLFormElement, events: IEvents)` - принимает элемент формы и брокер событий
+
+Поля:
+`formElement: HTMLFormElement` - элемент формы
+`errorsElement: HTMLElement` - элемент для отображения текста ошибок
+`submitButton: HTMLButtonElement` - кнопка отправки формы
+
+Методы:
+`set isValid(value: boolean)` - блокирует/разблокирует кнопку отправки в зависимости от валидности формы
+`set errors(value: string)` - устанавливает текст ошибки
+`render(data?: Partial<IForm>): HTMLElement` - отображает форму
 
 ##### FormOrderComponent
 Форма для выбора способа оплаты и ввода адреса доставки.
 
+Конструктор:
+`constructor(container: HTMLFormElement, events: IEvents)` - принимает элемент формы и брокер событий
+
+Поля:
+`cardButton: HTMLButtonElement` - кнопка выбора оплаты картой
+`cashButton: HTMLButtonElement` - кнопка выбора оплаты наличными
+`addressInput: HTMLInputElement` - поле ввода адреса доставки
+
+Методы:
+`set payment(value: string)` - устанавливает активный способ оплаты
+`set address(value: string)` - устанавливает значение поля адреса
+
 ##### FormContactsComponent
 Форма для ввода контактных данных покупателя.
 
+Конструктор:
+`constructor(container: HTMLFormElement, events: IEvents)` - принимает элемент формы и брокер событий
+
+Поля:
+`emailInput: HTMLInputElement` - поле ввода email
+`phoneInput: HTMLInputElement` - поле ввода телефона
+
+Методы:
+`set email(value: string)` - устанавливает значение поля email
+`set phone(value: string)` - устанавливает значение поля phone
+
 #### BasketComponent
-Контейнер корзины.
+Компонент корзины.
+
+Конструктор:
+`constructor(container: HTMLElement, events: IEvents)` - принимает контейнер и брокер событий
+
+Поля:
+`listElement: HTMLElement` - элемент списка товаров
+`priceElements: HTMLElement` - элемент отображения суммы
+`orderButton: HTMLButtonElement` - кнопка оформления заказа
+
+Методы:
+`set content(value: HTMLElement[])` - заполняет список карточками товаров
+`set total(value: number)` - устанавливает текст общей суммы
+`render(data?: Partial<IBasket>): HTMLElement` - отображает корзину
 
 #### OrderSuccessComponent
 Экран успешного оформления заказа.
+
+Конструктор:
+`constructor(container: HTMLElement, events: IEvents)` - принимает контейнер и брокер событий
+
+Поля:
+`descriptionElement: HTMLElement` - элемент для отображения сообщения о списании
+`closeButton: HTMLButtonElement` - кнопка закрытия
+
+Методы:
+`set total(value: number)` - устанавливает текст сообщения с суммой списанных синапсов
+
+### Презентер
+Презентер реализован в файле main.ts и связывает модели данных с компонентами представления. 
+Выбран подход с использованием единого файла-презентера без выделения отдельного класса, что соответствует рекомендациям для одностраничного приложения.
+
+#### События моделей данных
+`catalog:change` - изменение каталога товаров
+`product:select` - изменение выбранного для просмотра товара
+`basket:change` - изменение содержимого корзины
+`buyer:change` - изменение данных покупателя
+
+#### События представления
+`card:click` - выбор карточки для просмотра
+`product:add` - нажатие кнопки покупки товара
+`product:delete` - нажатие кнопки удаления товара из корзины (в модалке)
+`basket:open` - нажатие кнопки открытия корзины
+`basket:remove` - нажатие кнопки удаления товара из корзины (в корзине)
+`basket:order` - нажатие кнопки оформления заказа
+`order:submit` - нажатие кнопки перехода ко второй форме оформления заказа
+`contacts:submit` - нажатие кнопки оплаты/завершения оформления заказа
+`success:close` - закрытие окна успешного оформления заказа
+`payment:change` - изменение способа оплаты
+`address:change` - изменение адреса доставки
+`email:change` - изменение email
+`phone:change` - изменение телефона
+
+#### Системные события модального окна
+`modal:open` - открытие модального окна
+`modal:close` - закрытие модального окна
+
