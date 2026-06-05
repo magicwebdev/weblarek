@@ -1,4 +1,4 @@
-import { ensureElement } from '../../utils/utils';
+import { ensureElement, setElementData } from '../../utils/utils';
 import { Component } from '../base/Component';
 import { TCard } from '../../types';
 
@@ -11,6 +11,10 @@ export abstract class CardComponent<T extends TCard> extends Component<T> {
 
     this.cardTitleElement = ensureElement<HTMLElement>('.card__title', this.container);
     this.cardPriceElement = ensureElement<HTMLElement>('.card__price', this.container);
+  }
+
+  set id(value: string) {
+    setElementData(this.container, { id: value });
   }
 
   set title(value: string) {

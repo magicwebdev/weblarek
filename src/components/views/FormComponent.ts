@@ -9,7 +9,7 @@ export abstract class FormComponent<T extends IForm> extends Component<T> {
   protected submitButton: HTMLButtonElement;
 
   constructor(
-    container: HTMLElement,
+    container: HTMLFormElement,
     protected events: IEvents,
   ) {
     super(container);

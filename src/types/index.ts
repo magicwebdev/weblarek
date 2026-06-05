@@ -52,13 +52,14 @@ export interface ICatalog {
   content: HTMLElement[];
 }
 
-export type TCard = Pick<IProduct, 'title' | 'price'>;
+export type TCard = Pick<IProduct, 'id' | 'title' | 'price'>;
 
 export type TCardCatalog = TCard & Pick<IProduct, 'category' | 'image'>;
 
 export type TCardPreview = TCardCatalog &
   Pick<IProduct, 'description'> & {
-    inBasket: boolean;
+    isUnavailable: boolean;
+    isInBasket: boolean;
   };
 
 export type TCardBasket = TCard & {

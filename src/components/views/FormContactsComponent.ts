@@ -8,7 +8,7 @@ export class FormContactsComponent extends FormComponent<TFormContacts> {
   protected phoneInput: HTMLInputElement;
 
   constructor(
-    container: HTMLElement,
+    container: HTMLFormElement,
     protected events: IEvents,
   ) {
     super(container, events);

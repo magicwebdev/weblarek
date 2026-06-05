@@ -30,4 +30,10 @@ export class BasketComponent extends Component<IBasket> {
   set total(value: number) {
     this.priceElements.textContent = `${value} синапсов`;
   }
+
+  render(data?: Partial<IBasket>): HTMLElement {
+    Object.assign(this as object, data ?? {});    
+    this.orderButton.disabled = !Boolean(data?.total);
+    return this.container;
+  }
 }

@@ -1,9 +1,10 @@
 import { IProduct } from '../../types';
+import { IEvents } from '../base/Events';
 
 export class Basket {
   protected selectedProducts: IProduct[];
 
-  constructor() {
+  constructor(protected events: IEvents) {
     this.selectedProducts = [];
   }
 
@@ -13,17 +14,20 @@ export class Basket {
 
   addProduct(product: IProduct): void {
     this.selectedProducts.push(product);
+    this.events.emit('basket:change');
   }
 
   deleteProduct(product: IProduct): void {
     const index = this.selectedProducts.findIndex((selectedProduct) => selectedProduct.id === product.id);
     if (index !== -1) {
       this.selectedProducts.splice(index, 1);
+      this.events.emit('basket:change');
     }
   }
 
   clearBasket(): void {
     this.selectedProducts = [];
+    this.events.emit('basket:change');
   }
 
   getTotalPrice(): number {

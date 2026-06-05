@@ -1,7 +1,6 @@
-import { ensureElement, setCardCategory } from '../../utils/utils';
+import { ensureElement, getElementData } from '../../utils/utils';
 import { CDN_URL } from '../../utils/constants';
 import { CardComponent } from './CardComponent';
-import { IEvents } from '../base/Events';
 import { TCardPreview } from '../../types';
 
 export class CardPreviewComponent extends CardComponent<TCardPreview> {
@@ -12,7 +11,7 @@ export class CardPreviewComponent extends CardComponent<TCardPreview> {
 
   constructor(
     container: HTMLElement,
-    protected events: IEvents,
+    protected onCardClick: (data: { id: string }) => void,
   ) {
     super(container);
 
@@ -22,13 +21,12 @@ export class CardPreviewComponent extends CardComponent<TCardPreview> {
     this.cardButtonElement = ensureElement<HTMLButtonElement>('.card__button', this.container);
 
     this.cardButtonElement.addEventListener('click', () => {
-      this.events.emit('basket:change', { id: this.container.id });
+      const data = getElementData<TCardPreview>(this.container, { id: String });
+      if (data.id) {
+        this.onCardClick({ id: data.id });
+      }
     });
-  }
-
-  set category(value: string) {
-    setCardCategory(this.cardCategoryElement, value);
-  }
+  } 
 
   set image(value: string) {
     this.cardImageElement.src = `${CDN_URL}${value}`;
@@ -38,15 +36,11 @@ export class CardPreviewComponent extends CardComponent<TCardPreview> {
     this.cardDescriptionElement.textContent = value;
   }
 
-  set buttonText(value: string) {
-    this.cardButtonElement.textContent = value;
-  }
-
-  set buttonDisabled(value: boolean) {
-    this.cardButtonElement.disabled = value;
-  }
-  
-  set inBasket(value: boolean) {
-    this.buttonText = value ? 'Недоступно' : 'Купить';
+  render(data?: Partial<TCardPreview>): HTMLElement {
+    Object.assign(this as object, data ?? {});
+    const buttonText = data?.isUnavailable ? 'Недоступно' : data?.isInBasket ? 'Удалить из корзины' : 'Купить';
+    this.cardButtonElement.textContent = buttonText;
+    this.cardButtonElement.disabled = Boolean(data?.isUnavailable);
+    return this.container;
   }
 }

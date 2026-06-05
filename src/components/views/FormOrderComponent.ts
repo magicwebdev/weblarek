@@ -9,7 +9,7 @@ export class FormOrderComponent extends FormComponent<TFormOrder> {
   protected addressInput: HTMLInputElement;
 
   constructor(
-    container: HTMLElement,
+    container: HTMLFormElement,
     protected events: IEvents,
   ) {
     super(container, events);

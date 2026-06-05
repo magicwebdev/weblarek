@@ -1,4 +1,4 @@
-import { ensureElement, setCardCategory } from '../../utils/utils';
+import { ensureElement, setCardCategory, setElementData, getElementData } from '../../utils/utils';
 import { CDN_URL } from '../../utils/constants';
 import { CardComponent } from './CardComponent';
 import { IEvents } from '../base/Events';
@@ -16,6 +16,17 @@ export class CardCatalogComponent extends CardComponent<TCardCatalog> {
 
     this.cardCategoryElement = ensureElement<HTMLElement>('.card__category', this.container);
     this.cardImageElement = ensureElement<HTMLImageElement>('.card__image', this.container);
+
+    this.container.addEventListener('click', () => {
+      const data = getElementData<TCardCatalog>(this.container, { id: String });
+      if (data.id) {
+        this.events.emit('card:click', { id: data.id });
+      }
+    });
+  }
+
+  set id(value: string) {
+    setElementData(this.container, { id: value });
   }
 
   set category(value: string) {

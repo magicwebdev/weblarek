@@ -1,4 +1,4 @@
-import { ensureElement } from '../../utils/utils';
+import { ensureElement, getElementData } from '../../utils/utils';
 import { CardComponent } from './CardComponent';
 import { IEvents } from '../base/Events';
 import { TCardBasket } from '../../types';
@@ -15,17 +15,16 @@ export class CardBasketComponent extends CardComponent<TCardBasket> {
 
     this.cardIndexElement = ensureElement<HTMLElement>('.basket__item-index', this.container);
     this.cardDeleteButton = ensureElement<HTMLButtonElement>('.basket__item-delete', this.container);
-    
+
     this.cardDeleteButton.addEventListener('click', () => {
-      this.events.emit('basket:remove', { id: this.container.id });
+      const data = getElementData<TCardBasket>(this.container, { id: String });
+      if (data.id) {
+        this.events.emit('basket:remove', { id: data.id });
+      }
     });
   }
 
   set index(value: number) {
     this.cardIndexElement.textContent = String(value);
-  }
-  
-  remove() {
-    this.container.remove();
   }
 }
