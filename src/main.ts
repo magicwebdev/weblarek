@@ -17,7 +17,7 @@ import { FormContactsComponent } from './components/views/FormContactsComponent'
 import { FormOrderComponent } from './components/views/FormOrderComponent';
 import { BasketComponent } from './components/views/BasketComponent';
 import { OrderSuccessComponent } from './components/views/OrderSuccessComponent';
-import { TCardCatalog } from './types';
+import { TCardCatalog, TPayment } from './types';
 
 const events = new EventEmitter();
 const buyer = new Buyer(events);
@@ -38,17 +38,11 @@ const formOrderElement = ensureElement<HTMLTemplateElement>('#order');
 const formContactsElement = ensureElement<HTMLTemplateElement>('#contacts');
 const orderSuccessElement = ensureElement<HTMLTemplateElement>('#success');
 
-const cardCatalogTemplate = cloneTemplate<HTMLElement>(cardCatalogElement);
-const cardPreviewTemplate = cloneTemplate<HTMLElement>(cardPreviewElement);
-const cardBasketTemplate = cloneTemplate<HTMLElement>(cardBasketElement);
 const basketTemplate = cloneTemplate<HTMLElement>(basketElement);
 const formOrderTemplate = cloneTemplate<HTMLFormElement>(formOrderElement);
 const formContactsTemplate = cloneTemplate<HTMLFormElement>(formContactsElement);
 const orderSuccessTemplate = cloneTemplate<HTMLElement>(orderSuccessElement);
 
-const cardCatalogComponent = new CardCatalogComponent(cardCatalogTemplate, events);
-const cardPreviewComponent = new CardPreviewComponent(cardPreviewTemplate, events);
-const cardBasketComponent = new CardBasketComponent(cardBasketTemplate, events);
 const basketComponent = new BasketComponent(basketTemplate, events);
 const formOrderComponent = new FormOrderComponent(formOrderTemplate, events);
 const formContactsComponent = new FormContactsComponent(formContactsTemplate, events);
@@ -132,7 +126,7 @@ events.on('product:delete', () => {
 events.on('basket:change', () => {
   headerComponent.render({
     counter: basket.getProductsCount(),
-  });    
+  });
 });
 
 // рендер корзины
@@ -143,8 +137,6 @@ const renderBasket = () => {
     const card = new CardBasketComponent(cardTemplate, events);
     return card.render({ ...product, index: index + 1 });
   });
-  const basketTemplate = cloneTemplate<HTMLElement>(basketElement);
-  const basketComponent = new BasketComponent(basketTemplate, events);
   modalComponent.render({
     content: basketComponent.render({
       content: basketCards,
@@ -168,6 +160,91 @@ events.on('basket:remove', (data: { id: string }) => {
   basket.deleteProduct(product);
   renderBasket();
 });
+
+// оформление заказа
+events.on('basket:order', () => {
+  modalComponent.render({
+    content: formOrderComponent.render({
+      ...buyer,
+      isValid: false,
+      errors: '',
+    }),
+  });
+});
+
+// изменение способа оплаты
+events.on('payment:change', (data: { payment: TPayment }) => {
+  buyer.setPayment(data.payment);
+});
+
+// изменение адреса
+events.on('address:change', (data: { address: string }) => {
+  buyer.setAddress(data.address);
+});
+
+// изменение email
+events.on('email:change', (data: { email: string }) => {
+  buyer.setEmail(data.email);
+});
+
+// изменение телефона
+events.on('phone:change', (data: { phone: string }) => {
+  buyer.setPhone(data.phone);
+});
+
+// изменеие данных покупателя
+events.on('buyer:change', () => {
+  const buyerData = buyer.getBuyerData();
+  const errors = buyer.validateBuyerData();
+  formOrderComponent.render({
+    ...buyerData,
+    isValid: !errors.payment && !errors.address,
+    errors: errors.payment || errors.address || '',
+  });
+  formContactsComponent.render({
+    ...buyerData,
+    isValid: !errors.email && !errors.phone,
+    errors: errors.email || errors.phone || '',
+  });
+});
+
+// переход ко второй форме оформления заказа
+events.on('order:submit', () => {
+  modalComponent.render({
+    content: formContactsComponent.render({
+      ...buyer,
+      isValid: false,
+      errors: '',
+    }),
+  });
+});
+
+// оформление заказа
+events.on('contacts:submit', () => {
+  api
+    .postOrder({
+      items: basket.getSelectedProducts().map((product) => product.id),
+      total: basket.getTotalPrice(),
+      ...buyer.getBuyerData(),
+    })
+    .then((result) => {
+      basket.clearBasket();
+      buyer.clearBuyerData();
+      modalComponent.render({
+        content: orderSuccessComponent.render({
+          total: result.total,
+        }),
+      });
+    })
+    .catch((error) => {
+      console.log('Ошибка при оформления заказа:', error);
+    });
+});
+
+// завершение оформления заказа
+events.on('success:close', () => {
+  modalComponent.close();
+})
 
 // запрещаем скролл при открытии модального окна
 events.on('modal:open', () => {

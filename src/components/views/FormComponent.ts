@@ -5,7 +5,7 @@ import { IForm } from '../../types';
 
 export abstract class FormComponent<T extends IForm> extends Component<T> {
   protected formElement: HTMLFormElement;
-  protected errorElement: HTMLElement;
+  protected errorsElement: HTMLElement;
   protected submitButton: HTMLButtonElement;
 
   constructor(
@@ -15,7 +15,7 @@ export abstract class FormComponent<T extends IForm> extends Component<T> {
     super(container);
 
     this.formElement = this.container as HTMLFormElement;
-    this.errorElement = ensureElement<HTMLElement>('.form__errors', this.container);
+    this.errorsElement = ensureElement<HTMLElement>('.form__errors', this.container);
     this.submitButton = ensureElement<HTMLButtonElement>('button[type="submit"]', this.container);
 
     this.submitButton.addEventListener('click', (event) => {
@@ -28,13 +28,18 @@ export abstract class FormComponent<T extends IForm> extends Component<T> {
     this.submitButton.disabled = !value;
   }
 
-  set error(value: string) {
-    this.errorElement.textContent = value;
+  set errors(value: string) {
+    this.errorsElement.textContent = value;
   }
 
-  reset() {
-    this.error = '';
-    this.isValid = false;
-    this.formElement.reset();
+  render(data?: Partial<IForm>): HTMLElement {
+    Object.assign(this as object, data ?? {});
+    if (data?.isValid !== undefined) {
+      this.isValid = data.isValid;
+    }
+    if (data?.errors !== undefined) {
+      this.errors = data.errors;
+    }
+    return this.container;
   }
 }

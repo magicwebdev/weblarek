@@ -20,10 +20,12 @@ export class FormOrderComponent extends FormComponent<TFormOrder> {
 
     this.cardButton.addEventListener('click', () => {
       this.events.emit('payment:change', { payment: 'card' });
+      this.payment = 'card';
     });
 
     this.cashButton.addEventListener('click', () => {
       this.events.emit('payment:change', { payment: 'cash' });
+      this.payment = 'cash';
     });
 
     this.addressInput.addEventListener('input', () => {

@@ -72,7 +72,7 @@ export interface IOrderSuccess {
 
 export interface IForm {
   isValid: boolean;
-  error: string;
+  errors: string;
 }
 
 export type TFormContacts = IForm & Pick<IBuyer, 'email' | 'phone'>;
