@@ -39,3 +39,46 @@ export interface IOrderResponse {
   id: string;
   total: number;
 }
+
+export interface IHeader {
+  counter: number;
+}
+
+export interface IModal {
+  content: HTMLElement;
+}
+
+export interface ICatalog {
+  content: HTMLElement[];
+}
+
+export type TCard = Pick<IProduct, 'title' | 'price'>;
+
+export type TCardCatalog = TCard & Pick<IProduct, 'category' | 'image'>;
+
+export type TCardPreview = TCardCatalog &
+  Pick<IProduct, 'description'> & {
+    inBasket: boolean;
+  };
+
+export type TCardBasket = TCard & {
+  index: number;
+};
+
+export interface IOrderSuccess {
+  total: number;
+}
+
+export interface IForm {
+  isValid: boolean;
+  error: string;
+}
+
+export type TFormContacts = IForm & Pick<IBuyer, 'email' | 'phone'>;
+
+export type TFormOrder = IForm & Pick<IBuyer, 'payment' | 'address'>;
+
+export interface IBasket {
+  content: HTMLElement[];
+  total: number;
+}

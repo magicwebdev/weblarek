@@ -1,55 +1,64 @@
 import './scss/styles.scss';
-import { apiProducts } from './utils/data';
 import { Buyer } from './components/models/Buyer';
 import { Basket } from './components/models/Basket';
 import { Catalog } from './components/models/Catalog';
 import { Api } from './components/base/Api';
 import { AppApi } from './components/services/AppApi';
 import { API_URL } from './utils/constants';
+import { EventEmitter } from './components/base/Events';
+import { cloneTemplate, ensureElement } from './utils/utils';
+import { HeaderComponent } from './components/views/HeaderComponent';
+import { ModalComponent } from './components/views/ModalComponent';
+import { CatalogComponent } from './components/views/CatalogComponent';
+import { CardCatalogComponent } from './components/views/CardCatalogComponent';
+import { CardBasketComponent } from './components/views/CardBasketComponent';
+import { CardPreviewComponent } from './components/views/CardPreviewComponent';
+import { OrderSuccessComponent } from './components/views/OrderSuccessComponent';
 
-const catalog = new Catalog();
-catalog.setProducts(apiProducts.items);
-console.log('Массив товаров из каталога: ', catalog.getProducts());
-const productId = apiProducts.items[0]?.id;
-console.log(`Поиск товара по ID = ${productId}:`, catalog.getProductById(productId));
-catalog.setSelectedProduct(apiProducts.items[1]);
-console.log('Выбранный товар:', catalog.getSelectedProduct());
-
-const basket = new Basket();
-basket.addProduct(apiProducts.items[0]);
-basket.addProduct(apiProducts.items[1]);
-console.log('Товары в корзине:', basket.getSelectedProducts());
-console.log('Количество товаров в корзине:', basket.getProductsCount());
-console.log('Общая стоимость корзины:', basket.getTotalPrice());
-console.log(`Есть ли товар с ID = ${productId} в корзине?`, basket.hasProductInBasket(productId));
-basket.deleteProduct(apiProducts.items[0]);
-console.log('После удаления товара, количество товаров:', basket.getProductsCount());
-basket.clearBasket();
-console.log('После очистки корзины, количество товаров:', basket.getProductsCount());
+const events = new EventEmitter();
 
 const buyer = new Buyer();
-buyer.setPayment('card');
-buyer.setEmail('test@yandex.ru');
-buyer.setPhone('+79123456789');
-buyer.setAddress('г. Архангельск, ул. Победы, д. 1, кв. 1');
-console.log('Данные покупателя после заполнения:', buyer.getBuyerData());
-console.log('Проверка заполненных данных:', buyer.validateBuyerData());
-buyer.clearBuyerData();
-console.log('Проверка данных покупателя после очистки:', buyer.validateBuyerData());
+const basket = new Basket();
+const catalog = new Catalog();
 
 const baseApi = new Api(API_URL);
 const api = new AppApi(baseApi);
-console.log('URL сервера:', API_URL);
+
 api
   .getProducts()
   .then((data) => {
-    console.log('Ответ от сервера получен!');
-    console.log('Всего товаров:', data.total);
-    console.log('Массив товаров с сервера:', data.items);
     catalog.setProducts(data.items);
-    console.log('Товары в каталоге после загрузки с сервера:', catalog.getProducts());
-    console.log('Количество товаров в каталоге:', catalog.getProducts().length);
   })
   .catch((error) => {
     console.error('Ошибка при загрузке товаров с сервера:', error);
   });
+
+const headerComponent = new HeaderComponent(ensureElement<HTMLElement>('.header'), events);
+const modalComponent = new ModalComponent(ensureElement<HTMLElement>('.modal'), events);
+const catalogComponent = new CatalogComponent(ensureElement<HTMLElement>('.gallery'));
+
+const cardCatalogComponent = new CardCatalogComponent(cloneTemplate<HTMLElement>('#card-catalog'), events);
+const cardBasketComponent = new CardBasketComponent(cloneTemplate<HTMLElement>('#card-basket'), events);
+const cardPreviewComponent = new CardPreviewComponent(cloneTemplate<HTMLElement>('#card-preview'), events);
+
+// const main = ensureElement<HTMLElement>('.gallery');
+// console.log(catalog);
+// main.replaceChildren(cardPreviewComponent.render({
+//     "description": "Будет стоять над душой и не давать прокрастинировать.",
+//     "image": "/Asterisk_2.svg",
+//     "title": "Мамка-таймер",
+//     "category": "софт-скил",
+//     "price": null
+// }))
+// modalComponent.render();
+// modalComponent.open();
+
+// запрещаем скролл при открытии модального окна
+events.on('modal:open', () => {
+    document.body.style.overflow = 'hidden';  
+});
+
+// возвращаем скролл при закрытии модального окна
+events.on('modal:close', () => {
+    document.body.style.overflow = '';  
+});

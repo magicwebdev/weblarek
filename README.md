@@ -230,3 +230,41 @@ type TBuyerErrors = Partial<Record<keyof IBuyer, string>>;
 Методы класса:  
 `getProducts(): Promise<IProductsResponse>` - выполняет GET запрос на эндпоинт /product/ и возвращает промис с объектом, полученным от сервера, в котором находится массив товаров.
 `postOrder(order: IOrderData): Promise<IOrderResponse>` - выполняет POST запрос на эндпоинт /order/, передаёт в него данные, полученные в параметрах метода, и возвращает промис с объектом, подтверждающим покупку на определенную сумму.
+
+### Слой представления
+
+#### HeaderComponent
+Шапка сайта с корзиной.
+
+#### CatalogComponent
+Каталог товаров.
+
+#### ModalComponent
+Модальное окно.
+
+#### CardComponent
+Общий функционал для всех карточек.
+
+##### CardCatalogComponent
+Карточка товара в каталоге.
+
+##### CardBasketComponent
+Карточка товара в корзине.
+
+##### CardPreviewComponent
+Предпросмотр карточки товара.
+
+#### FormComponent
+Общий функционал для форм.
+
+##### FormOrderComponent
+Форма для выбора способа оплаты и ввода адреса доставки.
+
+##### FormContactsComponent
+Форма для ввода контактных данных покупателя.
+
+#### BasketComponent
+Контейнер корзины.
+
+#### OrderSuccessComponent
+Экран успешного оформления заказа.

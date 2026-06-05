@@ -1,3 +1,5 @@
+import { categoryMap } from './constants';
+
 export function pascalToKebab(value: string): string {
     return value.replace(/([a-z0–9])([A-Z])/g, "$1-$2").toLowerCase();
 }
@@ -135,4 +137,32 @@ export function createElement<
         }
     }
     return element;
+}
+
+/**
+ * Получает CSS-класс модификатор для категории
+ */
+export function getCategoryModifier(category: string): string | undefined {
+  return categoryMap[category as keyof typeof categoryMap];
+}
+
+/**
+ * Очищает все классы категорий с элемента
+ */
+export function clearCategoryClasses(element: HTMLElement): void {
+  Object.values(categoryMap).forEach((className) => {
+    element.classList.remove(className);
+  });
+}
+
+/**
+ * Устанавливает категорию карточки с соответствующим CSS-классом
+ */
+export function setCardCategory(element: HTMLElement, category: string): void {
+  element.textContent = category;
+  clearCategoryClasses(element);  
+  const modifierClass = getCategoryModifier(category);
+  if (modifierClass) {
+    element.classList.add(modifierClass);
+  }
 }
