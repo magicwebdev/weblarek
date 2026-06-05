@@ -109,7 +109,7 @@ events.on('product:add', () => {
     return;
   }
   basket.addProduct(product);
-  renderSelectedProductCard();
+  modalComponent.close();
 });
 
 // нажатие кнопки удаления товара из корзины
@@ -119,7 +119,7 @@ events.on('product:delete', () => {
     return;
   }
   basket.deleteProduct(product);
-  renderSelectedProductCard();
+  modalComponent.close();
 });
 
 // обновление корзины
