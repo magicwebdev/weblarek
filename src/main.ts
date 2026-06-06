@@ -119,10 +119,6 @@ events.on('basket:change', () => {
   headerComponent.render({
     counter: basket.getProductsCount(),
   });
-});
-
-// рендер корзины
-const renderBasket = () => {
   const products = basket.getSelectedProducts();
   const basketCards = products.map((product, index) => {
     const cardTemplate = cloneTemplate<HTMLElement>(cardBasketElement);
@@ -134,19 +130,19 @@ const renderBasket = () => {
     return card.render({ ...product, index: index + 1 });
   });
   const basketTotal = basket.getTotalPrice();
-  modalComponent.render({
-    content: basketComponent.render({
-      content: basketCards,
-      total: basketTotal,
-      buttonDisabled: basketTotal <= 0,
-    }),
+  basketComponent.render({
+    content: basketCards,
+    total: basketTotal,
+    buttonDisabled: basketTotal <= 0,
   });
-  modalComponent.open();
-};
+});
 
 // нажатие кнопки открытия корзины
 events.on('basket:open', () => {
-  renderBasket();
+  modalComponent.render({
+    content: basketComponent.render(),
+  });
+  modalComponent.open();
 });
 
 // нажатие кнопки удаления товара в корзине
@@ -156,17 +152,12 @@ events.on('basket:remove', (data: { id: string }) => {
     return;
   }
   basket.deleteProduct(product);
-  renderBasket();
 });
 
 // оформление заказа
 events.on('basket:order', () => {
   modalComponent.render({
-    content: formOrderComponent.render({
-      ...buyer,
-      isValid: false,
-      errors: '',
-    }),
+    content: formOrderComponent.render(),
   });
 });
 
@@ -209,11 +200,7 @@ events.on('buyer:change', () => {
 // переход ко второй форме оформления заказа
 events.on('order:submit', () => {
   modalComponent.render({
-    content: formContactsComponent.render({
-      ...buyer,
-      isValid: false,
-      errors: '',
-    }),
+    content: formContactsComponent.render(),
   });
 });
 
