@@ -268,6 +268,13 @@ index: number - порядковый номер товара в списке к�
 `email: string` - адрес электронной почты
 `phone: string `- номер телефона
 
+#### Тип TCardActions
+
+Тип для описания действий, доступных на карточке товара.
+
+Поля типа:
+`onClick: () => void` - функция-обработчик клика по карточке товара
+
 ### Модели данных
 
 Для учёта данных в приложении должны быть три класса, которые будут разделены между собой по смыслу и зонам ответственности.
@@ -374,7 +381,7 @@ index: number - порядковый номер товара в списке к�
 `constructor(container: HTMLElement)` - принимает DOM-элемент-контейнер для каталога
 
 Поля:
-(наследует поля от Component)
+`galleryElement: HTMLElement` - элемент галереи для размещения карточек товаров
 
 Методы:
 `set content(value: HTMLElement[])` - заполняет каталог массивом DOM-элементов карточек товаров, заменяя текущее содержимое
@@ -415,7 +422,7 @@ index: number - порядковый номер товара в списке к�
 Карточка товара в каталоге.
 
 Конструктор:
-`constructor(container: HTMLElement, actions: TCardActions)` - принимает контейнер и брокер событий
+`constructor(container: HTMLElement, actions: TCardActions)` - принимает контейнер и объект с обработчиком события
 
 Поля:
 `cardCategoryElement: HTMLElement` - элемент для отображения категории товара
@@ -430,7 +437,7 @@ index: number - порядковый номер товара в списке к�
 Карточка товара в корзине.
 
 Конструктор:
-`constructor(container: HTMLElement, events: IEvents)` - принимает контейнер и брокер событий
+`constructor(container: HTMLElement, actions: TCardActions)` - принимает контейнер и объект с обработчиком события
 
 Поля:
 `cardIndexElement: HTMLElement` - элемент для отображения порядкового номера
@@ -444,7 +451,7 @@ index: number - порядковый номер товара в списке к�
 Предпросмотр карточки товара.
 
 Конструктор:
-`constructor(container: HTMLElement, onCardClick: (data: { id: string }) => void)` - принимает контейнер и колбэк-функцию, которая вызывается при клике на кнопку товара
+`constructor(container: HTMLElement, protected events: IEvents)` - принимает контейнер и брокер событий
 
 Поля:
 `cardCategoryElement: HTMLElement` - элемент для отображения категории
@@ -455,7 +462,9 @@ index: number - порядковый номер товара в списке к�
 Методы:
 `set image(value: string)` - устанавливает изображение (добавляет базовый URL CDN)
 `set description(value: string)` - устанавливает описание товара
-`render(data?: Partial<TCardPreview>): HTMLElement` - отображает карточку
+`set buttonText(value: string)` - устанавливает текст кнопки
+`set buttonDisabled(value: boolean)` - блокирует/разблокирует кнопку
+`set category(value: string)` - устанавливает категорию с соответствующим CSS-классом
 
 #### FormComponent
 
@@ -472,7 +481,6 @@ index: number - порядковый номер товара в списке к�
 Методы:
 `set isValid(value: boolean)` - блокирует/разблокирует кнопку отправки в зависимости от валидности формы
 `set errors(value: string)` - устанавливает текст ошибки
-`render(data?: Partial<IForm>): HTMLElement` - отображает форму
 
 ##### FormOrderComponent
 
@@ -520,7 +528,7 @@ index: number - порядковый номер товара в списке к�
 Методы:
 `set content(value: HTMLElement[])` - заполняет список карточками товаров
 `set total(value: number)` - устанавливает текст общей суммы
-`render(data?: Partial<IBasket>): HTMLElement` - отображает корзину
+`set buttonDisabled(value: boolean)` - блокирует/разблокирует кнопку оформления заказа
 
 #### OrderSuccessComponent
 
@@ -551,8 +559,7 @@ index: number - порядковый номер товара в списке к�
 #### События представления
 
 `card:click` - выбор карточки для просмотра
-`product:add` - нажатие кнопки покупки товара
-`product:delete` - нажатие кнопки удаления товара из корзины (в модалке)
+`product:toggle` - нажатие кнопки в карточке предпросмотра (добавление/удаление из корзины)
 `basket:open` - нажатие кнопки открытия корзины
 `basket:remove` - нажатие кнопки удаления товара из корзины (в корзине)
 `basket:order` - нажатие кнопки оформления заказа
