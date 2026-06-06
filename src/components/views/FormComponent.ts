@@ -31,15 +31,4 @@ export abstract class FormComponent<T extends IForm> extends Component<T> {
   set errors(value: string) {
     this.errorsElement.textContent = value;
   }
-
-  render(data?: Partial<IForm>): HTMLElement {
-    Object.assign(this as object, data ?? {});
-    if (data?.isValid !== undefined) {
-      this.isValid = data.isValid;
-    }
-    if (data?.errors !== undefined) {
-      this.errors = data.errors;
-    }
-    return this.container;
-  }
 }

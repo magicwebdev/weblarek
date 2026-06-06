@@ -17,7 +17,7 @@ import { FormContactsComponent } from './components/views/FormContactsComponent'
 import { FormOrderComponent } from './components/views/FormOrderComponent';
 import { BasketComponent } from './components/views/BasketComponent';
 import { OrderSuccessComponent } from './components/views/OrderSuccessComponent';
-import { TCardCatalog, TPayment } from './types';
+import { TPayment } from './types';
 
 const events = new EventEmitter();
 const buyer = new Buyer(events);
@@ -28,7 +28,7 @@ const api = new AppApi(baseApi);
 
 const headerComponent = new HeaderComponent(ensureElement<HTMLElement>('.header'), events);
 const modalComponent = new ModalComponent(ensureElement<HTMLElement>('.modal'), events);
-const catalogComponent = new CatalogComponent(ensureElement<HTMLElement>('.gallery'));
+const catalogComponent = new CatalogComponent(ensureElement<HTMLElement>('.page'));
 
 const cardCatalogElement = ensureElement<HTMLTemplateElement>('#card-catalog');
 const cardPreviewElement = ensureElement<HTMLTemplateElement>('#card-preview');
@@ -63,14 +63,18 @@ events.on('catalog:change', () => {
   const products = catalog.getProducts();
   const cards = products.map((product) => {
     const cardTemplate = cloneTemplate<HTMLElement>(cardCatalogElement);
-    const card = new CardCatalogComponent(cardTemplate, events);
+    const card = new CardCatalogComponent(cardTemplate, {
+      onClick: () => {
+        events.emit('card:click', { id: product.id });
+      },
+    });
     return card.render(product);
   });
   catalogComponent.content = cards;
 });
 
 // выбор карточки для просмотра
-events.on('card:click', (data: Pick<TCardCatalog, 'id'>) => {
+events.on('card:click', (data: { id: string }) => {
   const product = catalog.getProductById(data.id);
   if (product === null) {
     return;
@@ -78,27 +82,25 @@ events.on('card:click', (data: Pick<TCardCatalog, 'id'>) => {
   catalog.setSelectedProduct(product);
 });
 
-// рендер выбранной карточки
-const renderSelectedProductCard = () => {
+// отображение выбранной карточки
+events.on('product:select', () => {
   const product = catalog.getSelectedProduct();
   if (product === null) {
     return;
   }
-  const isUnavailable = product.price === null;
   const isInBasket = basket.hasProductInBasket(product.id);
+  const buttonDisabled = product.price === null;
+  const buttonText = buttonDisabled ? 'Недоступно' : isInBasket ? 'Удалить из корзины' : 'Купить';
   const cardTemplate = cloneTemplate<HTMLElement>(cardPreviewElement);
-  const onCardClick = isInBasket
-    ? events.trigger<{ id: string }>('product:delete')
-    : events.trigger<{ id: string }>('product:add');
-  const card = new CardPreviewComponent(cardTemplate, onCardClick);
-  modalComponent.render({
-    content: card.render({ ...product, isUnavailable, isInBasket }),
+  const card = new CardPreviewComponent(cardTemplate, {
+    onClick: () => {
+      isInBasket ? events.emit('product:delete') : events.emit('product:add');
+      modalComponent.close();
+    },
   });
-};
-
-// отображение выбранной карточки
-events.on('product:select', () => {
-  renderSelectedProductCard();
+  modalComponent.render({
+    content: card.render({ ...product, isInBasket, buttonText, buttonDisabled }),
+  });
   modalComponent.open();
 });
 
@@ -109,7 +111,6 @@ events.on('product:add', () => {
     return;
   }
   basket.addProduct(product);
-  modalComponent.close();
 });
 
 // нажатие кнопки удаления товара из корзины
@@ -119,7 +120,6 @@ events.on('product:delete', () => {
     return;
   }
   basket.deleteProduct(product);
-  modalComponent.close();
 });
 
 // обновление корзины
@@ -134,13 +134,19 @@ const renderBasket = () => {
   const products = basket.getSelectedProducts();
   const basketCards = products.map((product, index) => {
     const cardTemplate = cloneTemplate<HTMLElement>(cardBasketElement);
-    const card = new CardBasketComponent(cardTemplate, events);
+    const card = new CardBasketComponent(cardTemplate, {
+      onClick: () => {
+        events.emit('basket:remove', { id: product.id });
+      },
+    });
     return card.render({ ...product, index: index + 1 });
   });
+  const basketTotal = basket.getTotalPrice();
   modalComponent.render({
     content: basketComponent.render({
       content: basketCards,
-      total: basket.getTotalPrice(),
+      total: basketTotal,
+      buttonDisabled: basketTotal <= 0,
     }),
   });
   modalComponent.open();
@@ -244,7 +250,7 @@ events.on('contacts:submit', () => {
 // завершение оформления заказа
 events.on('success:close', () => {
   modalComponent.close();
-})
+});
 
 // запрещаем скролл при открытии модального окна
 events.on('modal:open', () => {

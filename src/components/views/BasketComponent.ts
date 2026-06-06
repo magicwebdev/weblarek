@@ -19,7 +19,7 @@ export class BasketComponent extends Component<IBasket> {
     this.orderButton = ensureElement<HTMLButtonElement>('.basket__button', this.container);
 
     this.orderButton.addEventListener('click', () => {
-      this.events.emit('basket:order', {});
+      this.events.emit('basket:order');
     });
   }
 
@@ -31,9 +31,7 @@ export class BasketComponent extends Component<IBasket> {
     this.priceElements.textContent = `${value} синапсов`;
   }
 
-  render(data?: Partial<IBasket>): HTMLElement {
-    Object.assign(this as object, data ?? {});    
-    this.orderButton.disabled = !Boolean(data?.total);
-    return this.container;
+  set buttonDisabled(value: boolean) {
+    this.orderButton.disabled = value;
   }
 }

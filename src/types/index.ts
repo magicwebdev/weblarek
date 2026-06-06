@@ -52,14 +52,15 @@ export interface ICatalog {
   content: HTMLElement[];
 }
 
-export type TCard = Pick<IProduct, 'id' | 'title' | 'price'>;
+export type TCard = Pick<IProduct, 'title' | 'price'>;
 
 export type TCardCatalog = TCard & Pick<IProduct, 'category' | 'image'>;
 
 export type TCardPreview = TCardCatalog &
-  Pick<IProduct, 'description'> & {
-    isUnavailable: boolean;
+  Pick<IProduct, 'description'> & {    
     isInBasket: boolean;
+    buttonText: string;
+    buttonDisabled: boolean;
   };
 
 export type TCardBasket = TCard & {
@@ -82,4 +83,9 @@ export type TFormOrder = IForm & Pick<IBuyer, 'payment' | 'address'>;
 export interface IBasket {
   content: HTMLElement[];
   total: number;
+  buttonDisabled: boolean;
 }
+
+export type TCardActions = {
+  onClick: () => void;
+};
