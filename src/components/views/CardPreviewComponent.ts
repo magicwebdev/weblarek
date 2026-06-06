@@ -1,7 +1,8 @@
 import { ensureElement, setCardCategory } from '../../utils/utils';
 import { CDN_URL } from '../../utils/constants';
 import { CardComponent } from './CardComponent';
-import { TCardPreview, TCardActions } from '../../types';
+import { IEvents } from '../base/Events';
+import { TCardPreview } from '../../types';
 
 export class CardPreviewComponent extends CardComponent<TCardPreview> {
   protected cardCategoryElement: HTMLElement;
@@ -9,7 +10,10 @@ export class CardPreviewComponent extends CardComponent<TCardPreview> {
   protected cardDescriptionElement: HTMLElement;
   protected cardButtonElement: HTMLButtonElement;
 
-  constructor(container: HTMLElement, actions: TCardActions) {
+  constructor(
+    container: HTMLElement,
+    protected events: IEvents,
+  ) {
     super(container);
 
     this.cardCategoryElement = ensureElement<HTMLElement>('.card__category', this.container);
@@ -17,7 +21,9 @@ export class CardPreviewComponent extends CardComponent<TCardPreview> {
     this.cardDescriptionElement = ensureElement<HTMLElement>('.card__text', this.container);
     this.cardButtonElement = ensureElement<HTMLButtonElement>('.card__button', this.container);
 
-    this.cardButtonElement.addEventListener('click', actions.onClick);
+    this.cardButtonElement.addEventListener('click', () => {
+      this.events.emit('preview:toggle');
+    });
   }
 
   set category(value: string) {

@@ -38,11 +38,13 @@ const formOrderElement = ensureElement<HTMLTemplateElement>('#order');
 const formContactsElement = ensureElement<HTMLTemplateElement>('#contacts');
 const orderSuccessElement = ensureElement<HTMLTemplateElement>('#success');
 
+const сardPreviewTemplate = cloneTemplate<HTMLElement>(cardPreviewElement);
 const basketTemplate = cloneTemplate<HTMLElement>(basketElement);
 const formOrderTemplate = cloneTemplate<HTMLFormElement>(formOrderElement);
 const formContactsTemplate = cloneTemplate<HTMLFormElement>(formContactsElement);
 const orderSuccessTemplate = cloneTemplate<HTMLElement>(orderSuccessElement);
 
+const cardPreviewComponent = new CardPreviewComponent(сardPreviewTemplate, events);
 const basketComponent = new BasketComponent(basketTemplate, events);
 const formOrderComponent = new FormOrderComponent(formOrderTemplate, events);
 const formContactsComponent = new FormContactsComponent(formContactsTemplate, events);
@@ -91,35 +93,25 @@ events.on('product:select', () => {
   const isInBasket = basket.hasProductInBasket(product.id);
   const buttonDisabled = product.price === null;
   const buttonText = buttonDisabled ? 'Недоступно' : isInBasket ? 'Удалить из корзины' : 'Купить';
-  const cardTemplate = cloneTemplate<HTMLElement>(cardPreviewElement);
-  const card = new CardPreviewComponent(cardTemplate, {
-    onClick: () => {
-      isInBasket ? events.emit('product:delete') : events.emit('product:add');
-      modalComponent.close();
-    },
-  });
   modalComponent.render({
-    content: card.render({ ...product, isInBasket, buttonText, buttonDisabled }),
+    content: cardPreviewComponent.render({ ...product, isInBasket, buttonText, buttonDisabled }),
   });
   modalComponent.open();
 });
 
-// нажатие кнопки покупки товара
-events.on('product:add', () => {
+// нажатие кнопки в превью карточки
+events.on('preview:toggle', () => {
   const product = catalog.getSelectedProduct();
   if (product === null) {
     return;
   }
-  basket.addProduct(product);
-});
-
-// нажатие кнопки удаления товара из корзины
-events.on('product:delete', () => {
-  const product = catalog.getSelectedProduct();
-  if (product === null) {
-    return;
+  const isInBasket = basket.hasProductInBasket(product.id);
+  if (isInBasket) {
+    basket.deleteProduct(product);
+  } else {
+    basket.addProduct(product);
   }
-  basket.deleteProduct(product);
+  modalComponent.close();
 });
 
 // обновление корзины
